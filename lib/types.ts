@@ -202,6 +202,14 @@ export type OptionalKeys<T> = {
 /** Gets keys of an object which are required */
 export type RequiredKeys<T> = Exclude<keyof T, OptionalKeys<T>>;
 
+/** Gets keys of an object that can have a nullish value */
+export type NullishKeys<T> = {
+  [K in keyof T]-?: undefined extends T[K] ? K : null extends T[K] ? K : never;
+}[keyof T];
+
+/** Gets keys of an object that can't have a nullish value */
+export type NonNullishKeys<T> = Exclude<keyof T, NullishKeys<T>>;
+
 /** Recursively omit deep properties */
 // explicitly mentioning optional properties, to work around TS making them required
 // see https://github.com/krzkaczor/ts-essentials/issues/118

@@ -39,6 +39,8 @@ import {
   AsyncOrSync,
   Awaited,
   Newable,
+  NullishKeys,
+  NonNullishKeys,
 } from "../lib";
 
 function testDictionary() {
@@ -328,6 +330,22 @@ function testRequiredKeys() {
   type Actual = RequiredKeys<Input>;
 
   type Test = Assert<IsExact<Expected, Actual>>;
+}
+
+function testNullishKeys() {
+  type Input = {
+    req: string;
+    opt?: string;
+    undef: string | undefined;
+    nullable: string | null;
+    both?: string | null;
+  };
+
+  type ActualNullishKeys = NullishKeys<Input>;
+  type TestNullishKeys = Assert<IsExact<"opt" | "undef" | "nullable" | "both", ActualNullishKeys>>;
+
+  type ActualNonNullishKeys = NonNullishKeys<Input>;
+  type TestNonNullishKeys = Assert<IsExact<"req", ActualNonNullishKeys>>;
 }
 
 function testDeepOmit() {

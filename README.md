@@ -45,10 +45,12 @@ or `ts-essentials@2` instead. If you use any [functions](https://github.com/krzk
   - [Merge](#Merge)
   - [MarkRequired](#MarkRequired)
   - [MarkOptional](#MarkOptional)
-  - [ReadonlyKeys](#ReadonlyKeys)
-  - [WritableKeys](#WritableKeys)
-  - [OptionalKeys](#OptionalKeys)
-  - [RequiredKeys](#RequiredKeys)
+  - [Key filter types](#Key-filter-types)
+    - ReadonlyKeys
+    - WritableKeys
+    - OptionalKeys
+    - RequiredKeys
+    - (Non)NullishKeys
   - [UnionToIntersection](#UnionToIntersection)
   - [Opaque types](#Opaque-types)
   - [Tuple constraint](#Tuple-constraint)
@@ -121,12 +123,12 @@ const port: number = configDict["PORT"];
 
 ### Deep\* wrapper types
 
-- DeepPartial
-- DeepRequired
-- DeepReadonly
-- DeepNonNullable
-- DeepNullable
-- DeepUndefinable
+- `DeepPartial`
+- `DeepRequired`
+- `DeepReadonly`
+- `DeepNonNullable`
+- `DeepNullable`
+- `DeepUndefinable`
 
 _keywords: recursive, nested, optional_
 
@@ -512,64 +514,41 @@ type UserWithoutPassword = MarkOptional<User, "password">;
 // }
 ```
 
-### ReadonlyKeys
+### Key filter types
 
-Gets keys of an object which are readonly.
+Get different subsets of an object's keys:
 
-```typescript
-type T = {
-  readonly a: number;
-  b: string;
-};
-type Result = ReadonlyKeys<T>;
-// Result:
-// "a"
-```
-
-### WritableKeys
-
-Gets keys of an object which are writable.
+- `ReadonlyKeys`: keys which are readonly.
+- `WritableKeys`: keys which are writable.
+- `OptionalKeys`: keys which are optional.
+- `RequiredKeys`: keys which are required.
+- `NullishKeys`: keys that are optional or can have nullish values.
+- `NonNullishKeys`: keys that are required to have a non-nullish value.
 
 ```typescript
 type T = {
   readonly a: number;
   b: string;
 };
-type Result = WritableKeys<T>;
-// Result:
-// "b"
-```
+type TReadonlyKeys = ReadonlyKeys<T>;
+// TReadonlyKeys: "a"
+type TWritableKeys = WritableKeys<T>;
+// TWritableKeys: "b"
 
-### OptionalKeys
-
-Gets keys of an object which are optional.
-
-```typescript
-type T = {
+type O = {
   a: number;
   b?: string;
   c: string | undefined;
-  d?: string;
+  d: string | null;
 };
-type Result = OptionalKeys<T>;
-// Result:
-// "b" | "d"
-```
-
-### RequiredKeys
-
-Gets keys of an object which are required.
-
-```typescript
-type T = {
-  a: number;
-  b?: string;
-  c: string | undefined;
-  d?: string;
-};
-type Result = RequiredKeys<T>;
-// Result:
-// "a" | "c"
+type OOptionalKeys = OptionalKeys<O>;
+// OOptionalKeys: "b"
+type ORequiredKeys = RequiredKeys<O>;
+// ORequiredKeysResult: "a" | "c" | "d"
+type ONullishKeys = NullishKeys<O>;
+// ONullishKeys: "b" | "c" | "d"
+type ONonNullishKeys = NonNullishKeys<O>;
+// ONonNullishKeys: "a"
 ```
 
 ### UnionToIntersection
