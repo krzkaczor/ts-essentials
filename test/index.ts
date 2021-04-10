@@ -9,6 +9,7 @@ import {
   DeepNonNullable,
   DeepNullable,
   DeepOmit,
+  DeepPick,
   DeepPartial,
   DeepReadonly,
   DeepRequired,
@@ -330,8 +331,8 @@ function testRequiredKeys() {
   type Test = Assert<IsExact<Expected, Actual>>;
 }
 
-function testDeepOmit() {
-  type Nested = {
+function testDeepOmitAndDeepPick() {
+  type Whole = {
     a: { b: string; c: { d: string; e: boolean }; f: number };
     array: { a: string; b: boolean }[][];
     set: Set<{ a: string; b: boolean }>;
@@ -342,37 +343,46 @@ function testDeepOmit() {
         b: boolean;
       }
     >;
+    optionalProp?: number;
+    // filteredOptionalProp?: number;
   };
+
   type Omitted = {
     a: { c: { e: boolean }; f: number };
     array: { b: boolean }[][];
     set: Set<{ b: boolean }>;
     map: Map<number, { b: boolean }>;
+    optionalProp?: number;
   };
 
-  type Filter = {
+  type Picked = {
+    a: { b: string; c: { d: string } };
+    array: { a: string }[][];
+    set: Set<{ a: string }>;
+    map: Map<number, { a: string }>;
+    // filteredOptionalProp?: number;
+  };
+
+  // to demonstrate that types in filter can be defined either way (as 'true' or 'never')
+  type NeverFilter = {
     a: { b: never; c: { d: never } };
     array: { a: never };
     set: { a: never };
     map: { a: never };
   };
 
-  type Test = Assert<IsExact<DeepOmit<Nested, Filter>, Omitted>>;
-}
-
-function testDeepOmit2() {
-  type OptionalProperty = {
-    id: string;
-    age: number;
-    name?: string;
-  };
-  type Omitted = {
-    id: string;
-    name?: string;
+  type TrueFilter = {
+    a: { b: true; c: { d: true } };
+    array: { a: true };
+    set: { a: true };
+    map: { a: true };
   };
 
-  type Result = DeepOmit<OptionalProperty, { age: never }>;
-  type Test = Assert<IsExact<Result, Omitted>>;
+  type TestDeepOmitNeverFilter = Assert<IsExact<DeepOmit<Whole, NeverFilter>, Omitted>>;
+  type TestDeepPickNeverFilter = Assert<IsExact<DeepPick<Whole, NeverFilter>, Picked>>;
+
+  type TestDeepOmitFilter = Assert<IsExact<DeepOmit<Whole, TrueFilter>, Omitted>>;
+  type TestDeepPickTrueFilter = Assert<IsExact<DeepPick<Whole, TrueFilter>, Picked>>;
 }
 
 function testTupleInference() {

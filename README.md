@@ -22,49 +22,43 @@ or `ts-essentials@2` instead. If you use any [functions](https://github.com/krzk
 
 ## What's inside?
 
-- [Install](#Install)
-- [What's inside?](#Whats-inside)
-  - [Basic](#Basic)
-  - [Dictionaries](#Dictionaries)
-  - [Deep\* wrapper types](#Deep-wrapper-types)
-    - DeepPartial
-    - DeepRequired
-    - DeepReadonly
-    - DeepNonNullable
-    - DeepNullable
-    - DeepUndefinable
-  - [Writable & DeepWritable](#Writable)
-  - [Buildable](#Buildable)
-  - [Omit](#Omit)
-  - [StrictOmit](#StrictOmit)
-    - [Comparison between `Omit` and `StrictOmit`](#Comparison-between-Omit-and-StrictOmit)
-  - [DeepOmit](#DeepOmit)
-  - [OmitProperties](#OmitProperties)
-  - [PickProperties](#PickProperties)
-  - [NonNever](#NonNever)
-  - [Merge](#Merge)
-  - [MarkRequired](#MarkRequired)
-  - [MarkOptional](#MarkOptional)
-  - [ReadonlyKeys](#ReadonlyKeys)
-  - [WritableKeys](#WritableKeys)
-  - [OptionalKeys](#OptionalKeys)
-  - [RequiredKeys](#RequiredKeys)
-  - [UnionToIntersection](#UnionToIntersection)
-  - [Opaque types](#Opaque-types)
-  - [Tuple constraint](#Tuple-constraint)
-  - [Exhaustive switch cases](#Exhaustive-switch-cases)
-  - [ValueOf type](#ValueOf-type)
-  - [ElementOf type](#ElementOf-type)
-  - [AsyncOrSync type](#AsyncOrSync-type)
+- [Install](#install)
+- [What's inside?](#whats-inside)
+  - [Basic](#basic)
+  - [Dictionaries](#dictionaries)
+  - [Deep\* wrapper types](#deep-wrapper-types)
+  - [Writable](#writable)
+  - [Buildable](#buildable)
+  - [Omit](#omit)
+  - [StrictOmit](#strictomit)
+    - [Comparison between `Omit` and `StrictOmit`](#comparison-between-omit-and-strictomit)
+  - [DeepOmit](#deepomit)
+  - [DeepPick](#deeppick)
+  - [OmitProperties](#omitproperties)
+  - [PickProperties](#pickproperties)
+  - [NonNever](#nonnever)
+  - [NonEmptyObject](#nonemptyobject)
+  - [Merge](#merge)
+  - [MarkRequired](#markrequired)
+  - [MarkOptional](#markoptional)
+  - [ReadonlyKeys](#readonlykeys)
+  - [WritableKeys](#writablekeys)
+  - [OptionalKeys](#optionalkeys)
+  - [RequiredKeys](#requiredkeys)
+  - [UnionToIntersection](#uniontointersection)
+  - [Opaque types](#opaque-types)
+  - [Tuple constraint](#tuple-constraint)
+  - [Exhaustive switch cases](#exhaustive-switch-cases)
+  - [ValueOf type](#valueof-type)
+  - [ElementOf type](#elementof-type)
+  - [AsyncOrSync type](#asyncorsync-type)
   - [Awaited type](#awaited-type)
   - [Newable](#newable)
-  - [Assertions](#Assertions)
-  - [Exact](#Exact)
-  - [XOR](#XOR)
+  - [Assertions](#assertions)
+  - [Exact](#exact)
+  - [XOR](#xor)
   - [Functional type essentials](#functional-type-essentials)
-    - Head
-    - Tail
-- [Contributors](#Contributors)
+- [Contributors](#contributors)
 
 ### Basic
 
@@ -366,6 +360,42 @@ NOTE
 
 - `DeepOmit` works fine with `Array`s and `Set`s. When applied to a `Map`, the filter is only applied to its value.
 - If there exists any property in the filter which is not in the original type, an error will occur.
+
+### DeepPick
+
+Recursively pick deep properties according to key names.
+
+This type works as complementary type to DeepOmit, in the similar way like Exclude and Extract types complement each other.
+
+The filter syntax is the same as for the DeepPick, so one filter can be used to obtain both DeepPick and DeepOmit types from it.
+
+The properties to be picked completely should be defined as `never`. For the properties you want to partially pick, you should recursively define the sub-properties to be picked.
+
+```typescript
+interface Teacher {
+  name: string;
+  gender: string;
+  students: { name: string; score: number }[];
+}
+```
+
+```typescript
+type TeacherSimple = DeepPick<
+  Teacher,
+  {
+    gender: never;
+    students: {
+      score: never;
+    };
+  }
+>;
+
+// The result will be:
+// {
+//  gender: string;
+//  students: { score: number }[]
+// }
+```
 
 ### OmitProperties
 

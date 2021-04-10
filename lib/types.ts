@@ -205,73 +205,130 @@ export type RequiredKeys<T> = Exclude<keyof T, OptionalKeys<T>>;
 /** Recursively omit deep properties */
 // explicitly mentioning optional properties, to work around TS making them required
 // see https://github.com/krzkaczor/ts-essentials/issues/118
-export type DeepOmit<T extends DeepOmitModify<Filter>, Filter> = T extends Builtin
+export type DeepOmit<T extends FilterModify<F>, F> = T extends Builtin
   ? T
   : T extends Map<infer KeyType, infer ValueType>
-  ? ValueType extends DeepOmitModify<Filter>
-    ? Map<KeyType, DeepOmit<ValueType, Filter>>
+  ? ValueType extends FilterModify<F>
+    ? Map<KeyType, DeepOmit<ValueType, F>>
     : T
   : T extends ReadonlyMap<infer KeyType, infer ValueType>
-  ? ValueType extends DeepOmitModify<Filter>
-    ? ReadonlyMap<KeyType, DeepOmit<ValueType, Filter>>
+  ? ValueType extends FilterModify<F>
+    ? ReadonlyMap<KeyType, DeepOmit<ValueType, F>>
     : T
   : T extends WeakMap<infer KeyType, infer ValueType>
-  ? ValueType extends DeepOmitModify<Filter>
-    ? WeakMap<KeyType, DeepOmit<ValueType, Filter>>
+  ? ValueType extends FilterModify<F>
+    ? WeakMap<KeyType, DeepOmit<ValueType, F>>
     : T
   : T extends Set<infer ItemType>
-  ? ItemType extends DeepOmitModify<Filter>
-    ? Set<DeepOmit<ItemType, Filter>>
+  ? ItemType extends FilterModify<F>
+    ? Set<DeepOmit<ItemType, F>>
     : T
   : T extends ReadonlySet<infer ItemType>
-  ? ItemType extends DeepOmitModify<Filter>
-    ? ReadonlySet<DeepOmit<ItemType, Filter>>
+  ? ItemType extends FilterModify<F>
+    ? ReadonlySet<DeepOmit<ItemType, F>>
     : T
   : T extends WeakSet<infer ItemType>
-  ? ItemType extends DeepOmitModify<Filter>
-    ? WeakSet<DeepOmit<ItemType, Filter>>
+  ? ItemType extends FilterModify<F>
+    ? WeakSet<DeepOmit<ItemType, F>>
     : T
   : T extends Array<infer ItemType>
-  ? ItemType extends DeepOmitModify<Filter>
-    ? Array<DeepOmit<ItemType, Filter>>
+  ? ItemType extends FilterModify<F>
+    ? Array<DeepOmit<ItemType, F>>
     : T
   : T extends Promise<infer ItemType>
-  ? ItemType extends DeepOmitModify<Filter>
-    ? Promise<DeepOmit<ItemType, Filter>>
+  ? ItemType extends FilterModify<F>
+    ? Promise<DeepOmit<ItemType, F>>
     : T
-  : { [K in Exclude<OptionalKeys<T>, keyof Filter>]+?: T[K] } &
+  : { [K in Exclude<OptionalKeys<T>, keyof F>]+?: T[K] } &
       OmitProperties<
         {
-          [K in Extract<OptionalKeys<T>, keyof Filter>]+?: Filter[K] extends true
+          [K in Extract<OptionalKeys<T>, keyof F>]+?: F[K] extends true
             ? never
-            : T[K] extends DeepOmitModify<Filter[K]>
-            ? DeepOmit<T[K], Filter[K]>
+            : T[K] extends FilterModify<F[K]>
+            ? DeepOmit<T[K], F[K]>
             : T[K];
         },
         never
       > &
-      { [K in Exclude<RequiredKeys<T>, keyof Filter>]: T[K] } &
+      { [K in Exclude<RequiredKeys<T>, keyof F>]: T[K] } &
       OmitProperties<
         {
-          [K in Extract<RequiredKeys<T>, keyof Filter>]: Filter[K] extends true
+          [K in Extract<RequiredKeys<T>, keyof F>]: F[K] extends true
             ? never
-            : T[K] extends DeepOmitModify<Filter[K]>
-            ? DeepOmit<T[K], Filter[K]>
+            : T[K] extends FilterModify<F[K]>
+            ? DeepOmit<T[K], F[K]>
             : T[K];
         },
         never
       >;
-type DeepOmitModify<T> =
+
+/** Recursively pick deep properties */
+export declare type DeepPick<T extends FilterModify<F>, F> = T extends Builtin
+  ? T
+  : T extends Map<infer KeyType, infer ValueType>
+  ? ValueType extends FilterModify<F>
+    ? Map<KeyType, DeepPick<ValueType, F>>
+    : T
+  : T extends ReadonlyMap<infer KeyType, infer ValueType>
+  ? ValueType extends FilterModify<F>
+    ? ReadonlyMap<KeyType, DeepPick<ValueType, F>>
+    : T
+  : T extends WeakMap<infer KeyType, infer ValueType>
+  ? ValueType extends FilterModify<F>
+    ? WeakMap<KeyType, DeepPick<ValueType, F>>
+    : T
+  : T extends Set<infer ItemType>
+  ? ItemType extends FilterModify<F>
+    ? Set<DeepPick<ItemType, F>>
+    : T
+  : T extends ReadonlySet<infer ItemType>
+  ? ItemType extends FilterModify<F>
+    ? ReadonlySet<DeepPick<ItemType, F>>
+    : T
+  : T extends WeakSet<infer ItemType>
+  ? ItemType extends FilterModify<F>
+    ? WeakSet<DeepPick<ItemType, F>>
+    : T
+  : T extends Array<infer ItemType>
+  ? ItemType extends FilterModify<F>
+    ? Array<DeepPick<ItemType, F>>
+    : T
+  : T extends Promise<infer ItemType>
+  ? ItemType extends FilterModify<F>
+    ? Promise<DeepPick<ItemType, F>>
+    : T
+  : OmitProperties<
+      {
+        [K in Extract<OptionalKeys<T>, keyof F>]+?: F[K] extends true
+          ? T[K]
+          : T[K] extends FilterModify<F[K]>
+          ? DeepPick<T[K], F[K]>
+          : never;
+      },
+      never
+    > &
+      OmitProperties<
+        {
+          [K in Extract<RequiredKeys<T>, keyof F>]: F[K] extends true
+            ? T[K]
+            : T[K] extends FilterModify<F[K]>
+            ? DeepPick<T[K], F[K]>
+            : never;
+        },
+        never
+      >;
+
+type FilterModify<T> =
   | {
-      [K in keyof T]: T[K] extends never ? any : T[K] extends object ? DeepOmitModify<T[K]> : never;
+      [K in keyof T]: T[K] extends true ? any : T[K] extends object ? FilterModify<T[K]> : never;
     }
-  | Array<DeepOmitModify<T>>
-  | Promise<DeepOmitModify<T>>
-  | Set<DeepOmitModify<T>>
-  | ReadonlySet<DeepOmitModify<T>>
-  | WeakSet<DeepOmitModify<T>>
-  | Map<any, DeepOmitModify<T>>
-  | WeakMap<any, DeepOmitModify<T>>;
+  | Array<FilterModify<T>>
+  | Promise<FilterModify<T>>
+  | Set<FilterModify<T>>
+  | ReadonlySet<FilterModify<T>>
+  | WeakSet<FilterModify<T>>
+  | Map<any, FilterModify<T>>
+  | WeakMap<any, FilterModify<T>>;
 
 /** Remove keys with `never` value from object type */
 export type NonNever<T extends {}> = Pick<T, { [K in keyof T]: T[K] extends never ? never : K }[keyof T]>;
